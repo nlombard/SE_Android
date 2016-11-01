@@ -26,7 +26,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 //import com.google.android.gms.drive.Permission;
 //import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.CameraUpdateFactory;
+//import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 //import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
