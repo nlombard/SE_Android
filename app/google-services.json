@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "456661500136",
+    "firebase_url": "https://software-engineering-7ed83.firebaseio.com",
+    "project_id": "software-engineering-7ed83",
+    "storage_bucket": "software-engineering-7ed83.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:456661500136:android:4e3d5523493816af",
+        "android_client_info": {
+          "package_name": "com.se.sociallocation"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "456661500136-c1evij007v19f55drrg77415ctue1ug6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDyLfQpOOTNSkQuN8_4G_AC9yVk26IkCnE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
