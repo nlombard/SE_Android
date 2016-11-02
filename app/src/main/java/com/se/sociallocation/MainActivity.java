@@ -34,6 +34,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -44,6 +45,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity
         implements
@@ -63,6 +66,7 @@ public class MainActivity extends AppCompatActivity
     private FirebaseUser mFirebaseUser;
     private DatabaseReference mDatabase;
     private String mUserId;
+    private HashMap<String, Marker> mHashmap = new HashMap<String, Marker>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,11 +94,9 @@ public class MainActivity extends AppCompatActivity
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    getMyLocation();
                     FireLocation fire_location = new FireLocation(String.valueOf(myLocation.getLatitude()), String.valueOf(myLocation.getLongitude()));
                     mDatabase.child("data").child("locations").child(mUserId).setValue(fire_location);
-                    LatLng person = new LatLng(Double.parseDouble(fire_location.getLat()),Double.parseDouble(fire_location.getLng()));
-                    mMap.addMarker(new MarkerOptions().position(person).title("Marker in Sydney")
-                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.pegman)));
                     Snackbar.make(view, "Your location sent to database", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 }
@@ -108,6 +110,53 @@ public class MainActivity extends AppCompatActivity
 
             NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
             navigationView.setNavigationItemSelectedListener(this);
+
+            //Firebase callback setup
+            mDatabase.child("data").child("locations").addChildEventListener(new ChildEventListener() {
+
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    getMyLocation();
+                    FireLocation fire_location = new FireLocation(dataSnapshot.child("lat").getValue().toString(),dataSnapshot.child("lng").getValue().toString());
+                    LatLng person = new LatLng(Double.parseDouble(fire_location.getLat()),Double.parseDouble(fire_location.getLng()));
+                    if(!mHashmap.containsKey(dataSnapshot.getKey())) {
+                        Marker marker = mMap.addMarker(new MarkerOptions().position(person).title(dataSnapshot.getKey())
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.pegman)));
+                        mHashmap.put(dataSnapshot.getKey(), marker);
+                    } else {
+                        mHashmap.get(dataSnapshot.getKey()).setPosition(person);
+                    }
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                    //need to only change the one that matches the user id?! How to reget the database?
+                    FireLocation fire_location = new FireLocation(dataSnapshot.child("lat").getValue().toString(),dataSnapshot.child("lng").getValue().toString());
+                    LatLng person = new LatLng(Double.parseDouble(fire_location.getLat()),Double.parseDouble(fire_location.getLng()));
+                    if(!mHashmap.containsKey(dataSnapshot.getKey())) {
+                        Marker marker = mMap.addMarker(new MarkerOptions().position(person).title(dataSnapshot.getKey())
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.pegman)));
+                        mHashmap.put(dataSnapshot.getKey(), marker);
+                    } else {
+                        mHashmap.get(dataSnapshot.getKey()).setPosition(person);
+                    }
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot){
+
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
         }
     }
 
@@ -142,17 +191,16 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onConnected(Bundle connectionHint) {
+        getMyLocation();
+    }
+
+    public void getMyLocation(){
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             PermissionUtils.requestPermission(this, LOCATION_PERMISSION_REQUEST_CODE,
                     android.Manifest.permission.ACCESS_FINE_LOCATION, true);
         } else {
             myLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-//            Log.d("myLoc", "here");
-            Log.d("myLoc", myLocation.getLatitude() + " " + myLocation.getLongitude());
-//            LatLng myLoc = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
-//            mMap.addMarker(new MarkerOptions().position(myLoc).title("It's Me!"));
-//            mMap.moveCamera(CameraUpdateFactory.newLatLng(myLoc));
         }
     }
 
