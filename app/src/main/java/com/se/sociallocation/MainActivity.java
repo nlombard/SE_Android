@@ -102,6 +102,8 @@ public class MainActivity extends AppCompatActivity
                 }
             });
 
+            //getMyLocation();
+
             DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
             ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                     this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -116,7 +118,6 @@ public class MainActivity extends AppCompatActivity
 
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    getMyLocation();
                     FireLocation fire_location = new FireLocation(dataSnapshot.child("lat").getValue().toString(),dataSnapshot.child("lng").getValue().toString());
                     LatLng person = new LatLng(Double.parseDouble(fire_location.getLat()),Double.parseDouble(fire_location.getLng()));
                     if(!mHashmap.containsKey(dataSnapshot.getKey())) {
@@ -259,7 +260,9 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_logout) {
+            mFirebaseAuth.signOut(); //Signout
+            loadLogInView(); //leave page
             return true;
         }
 
