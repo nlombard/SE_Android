@@ -31,4 +31,5 @@
     <string name="login_error_title">Error</string>
     <string name="signup_error_message">Please make sure you enter an email address and password!</string>
     <string name="signup_error_title">Error!</string>
+    <string name="confirm_password_missing">Please confirm password</string>
 </resources>
