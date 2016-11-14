@@ -60,6 +60,7 @@ public class SignUpActivity extends AppCompatActivity {
                 } else if(!checkPassword(password,confirmPassword)) {/*function to check passwords that returns bool*/
                     confirmPasswordEditText.setError(getString(R.string.password_match_error));
                     confirmPasswordEditText.requestFocus();
+                    confirmPasswordEditText.setText("");
                 } else {
                     mFirebaseAuth.createUserWithEmailAndPassword(email, password)
                             .addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<AuthResult>() {
