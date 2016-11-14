@@ -57,9 +57,9 @@ public class SignUpActivity extends AppCompatActivity {
                 } else if(confirmPassword.isEmpty()) {
                     confirmPasswordEditText.setError(getString(R.string.confirm_password_missing));
                     confirmPasswordEditText.requestFocus();
-                } else if(confirmPassword.isEmpty()) {/*function to check passwords that returns bool*/
-                    //alert that passwords don't match or not long enough
-                    Log.d("tag", "fine");
+                } else if(!checkPassword(password,confirmPassword)) {/*function to check passwords that returns bool*/
+                    confirmPasswordEditText.setError(getString(R.string.password_match_error));
+                    confirmPasswordEditText.requestFocus();
                 } else {
                     mFirebaseAuth.createUserWithEmailAndPassword(email, password)
                             .addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<AuthResult>() {
@@ -85,4 +85,7 @@ public class SignUpActivity extends AppCompatActivity {
         });
     }
 
+    private boolean checkPassword(String password, String confirmPassword) {
+        return password.equals(confirmPassword);
+    }
 }
