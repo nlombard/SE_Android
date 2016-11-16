@@ -31,4 +31,7 @@
     <string name="login_error_title">Error</string>
     <string name="signup_error_message">Please make sure you enter an email address and password!</string>
     <string name="signup_error_title">Error!</string>
+
+    <!-- String related to user-->
+    <string name="tv_username">Username</string>
 </resources>

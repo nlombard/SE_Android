@@ -19,6 +19,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 //import com.google.android.gms.appindexing.AppIndex;
 //import com.google.android.gms.appindexing.Thing;
@@ -27,6 +28,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 //import com.google.android.gms.drive.Permission;
 //import com.google.android.gms.maps.CameraUpdateFactory;
 //import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 //import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -54,7 +56,7 @@ public class MainActivity extends AppCompatActivity
         OnMapReadyCallback,
         ActivityCompat.OnRequestPermissionsResultCallback,
         GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.OnConnectionFailedListener{
 
     private GoogleMap mMap;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
@@ -90,89 +92,124 @@ public class MainActivity extends AppCompatActivity
                     .findFragmentById(R.id.map);
             mapFragment.getMapAsync(this);
 
-            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-            fab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    getMyLocation();
-                    FireLocation fire_location = new FireLocation(String.valueOf(myLocation.getLatitude()), String.valueOf(myLocation.getLongitude()));
-                    mDatabase.child("data").child("locations").child(mUserId).setValue(fire_location);
-                    Snackbar.make(view, "Your location sent to database", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                }
-            });
-
-            //getMyLocation();
-
-            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                    this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-            drawer.setDrawerListener(toggle);
-            toggle.syncState();
+            setActionButton(); //set call back on location submit button
+            syncToggle(toolbar); //set up window bindings??
 
             NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
             navigationView.setNavigationItemSelectedListener(this);
 
-            //Firebase callback setup
-            mDatabase.child("data").child("locations").addChildEventListener(new ChildEventListener() {
-
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    FireLocation fire_location = new FireLocation(dataSnapshot.child("lat").getValue().toString(),dataSnapshot.child("lng").getValue().toString());
-                    LatLng person = new LatLng(Double.parseDouble(fire_location.getLat()),Double.parseDouble(fire_location.getLng()));
-                    if(!mHashmap.containsKey(dataSnapshot.getKey())) {
-                        Marker marker = mMap.addMarker(new MarkerOptions().position(person).title(dataSnapshot.getKey())
-                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.pegman)));
-                        mHashmap.put(dataSnapshot.getKey(), marker);
-                    } else {
-                        mHashmap.get(dataSnapshot.getKey()).setPosition(person);
-                    }
-                }
-
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                    //need to only change the one that matches the user id?! How to reget the database?
-                    FireLocation fire_location = new FireLocation(dataSnapshot.child("lat").getValue().toString(),dataSnapshot.child("lng").getValue().toString());
-                    LatLng person = new LatLng(Double.parseDouble(fire_location.getLat()),Double.parseDouble(fire_location.getLng()));
-                    if(!mHashmap.containsKey(dataSnapshot.getKey())) {
-                        Marker marker = mMap.addMarker(new MarkerOptions().position(person).title(dataSnapshot.getKey())
-                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.pegman)));
-                        mHashmap.put(dataSnapshot.getKey(), marker);
-                    } else {
-                        mHashmap.get(dataSnapshot.getKey()).setPosition(person);
-                    }
-                }
-
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot){
-
-                }
-
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
+            setUpFriends();
         }
     }
 
+//    @Override
+//    protected void onStart(){
+//
+//    }
 
-        @Override
-        public void onMapReady(GoogleMap googleMap){
-            mMap = googleMap;
 
-            enableMyLocation();
-            LatLng sydney = new LatLng(-34, 151);
-            mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney")
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.pegman)));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        }
+    @Override
+    public void onMapReady(GoogleMap googleMap){
+        mMap = googleMap;
 
+        enableMyLocation();
+        LatLng nd = new LatLng(41.703119, -86.238992); //Dome Coords
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(nd,2.0f));
+    }
+
+    private void setUpFriends(){
+        setFirebaseFriendBinding(mUserId);
+
+        mDatabase.child("data").child("friends").child(mUserId).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                if( (long) dataSnapshot.getValue() >= 1) {
+                    setFirebaseFriendBinding(dataSnapshot.getKey());
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) { //when value of friend is changed this will update
+                if( (long) dataSnapshot.getValue() >= 1) {
+                    setFirebaseFriendBinding(dataSnapshot.getKey());
+                } else if( (long) dataSnapshot.getValue() == 0){
+                    removeFirebaseFriendBinding(dataSnapshot.getKey());
+                }
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                removeFirebaseFriendBinding(dataSnapshot.getKey());
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+
+        });
+    }
+
+    //takes the userID of the person to bind to
+    //input a userID
+    //places this user on the current user's map
+    private void setFirebaseFriendBinding( String userID) {
+
+        mDatabase.child("data").child("locations").child(userID).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.hasChild("lat") && dataSnapshot.hasChild("lng") && dataSnapshot.hasChild("name")) {
+                    FireLocation fire_location = new FireLocation(dataSnapshot.child("lat").getValue().toString(), dataSnapshot.child("lng").getValue().toString());
+                    LatLng person = new LatLng(Double.parseDouble(fire_location.getLat()), Double.parseDouble(fire_location.getLng()));
+                    if (!mHashmap.containsKey(dataSnapshot.getKey())) {
+                        Marker marker = mMap.addMarker(new MarkerOptions().position(person).title(dataSnapshot.child("name").getValue().toString())
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.pegman)));
+                        mHashmap.put(dataSnapshot.getKey(), marker);
+                    } else {
+                        mHashmap.get(dataSnapshot.getKey()).setPosition(person);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void removeFirebaseFriendBinding( String friendID){
+        mHashmap.get(friendID).remove();
+        mHashmap.remove(friendID);
+    }
+
+    private void setActionButton(){
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getMyLocation();
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(myLocation.getLatitude(), myLocation.getLongitude()),16.0f));
+                FireLocation fire_location = new FireLocation(String.valueOf(myLocation.getLatitude()), String.valueOf(myLocation.getLongitude()));
+                mDatabase.child("data").child("locations").child(mUserId).setValue(fire_location);
+                Snackbar.make(view, "Your location sent to database", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
+    }
+    private void syncToggle(Toolbar toolbar){
+        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+    }
     private void enableMyLocation() {
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
