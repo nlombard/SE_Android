@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -39,9 +40,11 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String password = passwordEditText.getText().toString();
+                String confirmPassword = confirmPasswordEditText.getText().toString();
                 String email = emailEditText.getText().toString();
 
                 password = password.trim();
+                confirmPassword = confirmPassword.trim();
                 email = email.trim();
 
                 if (password.isEmpty() || email.isEmpty()) {
@@ -51,6 +54,13 @@ public class SignUpActivity extends AppCompatActivity {
                             .setPositiveButton(android.R.string.ok, null);
                     AlertDialog dialog = builder.create();
                     dialog.show();
+                } else if(confirmPassword.isEmpty()) {
+                    confirmPasswordEditText.setError(getString(R.string.confirm_password_missing));
+                    confirmPasswordEditText.requestFocus();
+                } else if(!checkPassword(password,confirmPassword)) {/*function to check passwords that returns bool*/
+                    confirmPasswordEditText.setError(getString(R.string.password_match_error));
+                    confirmPasswordEditText.requestFocus();
+                    confirmPasswordEditText.setText("");
                 } else {
                     mFirebaseAuth.createUserWithEmailAndPassword(email, password)
                             .addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<AuthResult>() {
@@ -76,4 +86,7 @@ public class SignUpActivity extends AppCompatActivity {
         });
     }
 
+    private boolean checkPassword(String password, String confirmPassword) {
+        return password.equals(confirmPassword);
+    }
 }
