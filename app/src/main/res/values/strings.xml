@@ -24,13 +24,14 @@
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">Password is incorrect</string>
     <string name="error_field_required">This field is required</string>
-    <string name="permission_rationale">"Contacts permissions are needed for providing email
-        completions."
-    </string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email completions."</string>
     <string name="title_activity_sign_up">New User</string>
     <string name="login_error_title">Error</string>
     <string name="signup_error_message">Please make sure you enter an email address and password!</string>
     <string name="signup_error_title">Error!</string>
+
+    <!-- String related to user-->
     <string name="confirm_password_missing">Please confirm password</string>
     <string name="password_match_error">Passwords don\'t match</string>
+    <string name="tv_username">Username</string>
 </resources>
