@@ -113,8 +113,9 @@ public class MainActivity extends AppCompatActivity
         mMap = googleMap;
 
         enableMyLocation();
+        getMyLocation();
         LatLng nd = new LatLng(41.703119, -86.238992); //Dome Coords
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(nd,2.0f));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(nd,13.0f));
     }
 
     private void setUpFriends(){
@@ -132,7 +133,7 @@ public class MainActivity extends AppCompatActivity
             public void onChildChanged(DataSnapshot dataSnapshot, String s) { //when value of friend is changed this will update
                 if( (long) dataSnapshot.getValue() >= 1) {
                     setFirebaseFriendBinding(dataSnapshot.getKey());
-                } else if( (long) dataSnapshot.getValue() == 0){
+                } else if( (long) dataSnapshot.getValue() == 0){  //this might be the reason for missing your person
                     removeFirebaseFriendBinding(dataSnapshot.getKey());
                 }
             }
@@ -164,13 +165,14 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.hasChild("lat") && dataSnapshot.hasChild("lng") && dataSnapshot.hasChild("name")) {
-                    FireLocation fire_location = new FireLocation(dataSnapshot.child("lat").getValue().toString(), dataSnapshot.child("lng").getValue().toString());
-                    LatLng person = new LatLng(Double.parseDouble(fire_location.getLat()), Double.parseDouble(fire_location.getLng()));
-                    if (!mHashmap.containsKey(dataSnapshot.getKey())) {
+                    Double lat = Double.parseDouble(dataSnapshot.child("lat").getValue().toString());
+                    Double lng = Double.parseDouble(dataSnapshot.child("lng").getValue().toString());
+                    LatLng person = new LatLng(lat,lng);
+                    if (!mHashmap.containsKey(dataSnapshot.getKey())) { //marker logic, if not in hashmap then create a marker
                         Marker marker = mMap.addMarker(new MarkerOptions().position(person).title(dataSnapshot.child("name").getValue().toString())
                                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.pegman)));
                         mHashmap.put(dataSnapshot.getKey(), marker);
-                    } else {
+                    } else { //else if it is in the map so the marker exists, move it
                         mHashmap.get(dataSnapshot.getKey()).setPosition(person);
                     }
                 }
@@ -195,9 +197,11 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 getMyLocation();
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(myLocation.getLatitude(), myLocation.getLongitude()),16.0f));
-                FireLocation fire_location = new FireLocation(String.valueOf(myLocation.getLatitude()), String.valueOf(myLocation.getLongitude()));
-                mDatabase.child("data").child("locations").child(mUserId).setValue(fire_location);
-                Snackbar.make(view, "Your location sent to database", Snackbar.LENGTH_LONG)
+
+                //now posts just change the value of the children
+                mDatabase.child("data").child("locations").child(mUserId).child("lat").setValue(String.valueOf(myLocation.getLatitude()));
+                mDatabase.child("data").child("locations").child(mUserId).child("lng").setValue(String.valueOf(myLocation.getLongitude()));
+                Snackbar.make(view, "Current Location Updated", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
