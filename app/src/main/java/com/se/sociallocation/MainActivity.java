@@ -2,6 +2,7 @@ package com.se.sociallocation;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -27,6 +28,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 //import com.google.android.gms.drive.Permission;
 //import com.google.android.gms.maps.CameraUpdateFactory;
 //import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 //import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -161,15 +163,14 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
         @Override
         public void onMapReady(GoogleMap googleMap){
             mMap = googleMap;
 
             enableMyLocation();
-            LatLng sydney = new LatLng(-34, 151);
-            mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney")
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.pegman)));
+//            LatLng sydney = new LatLng(-34, 151);
+//            mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney")
+//                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.pegman)));
 //        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         }
 
@@ -202,6 +203,7 @@ public class MainActivity extends AppCompatActivity
                     android.Manifest.permission.ACCESS_FINE_LOCATION, true);
         } else {
             myLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(myLocation.getLatitude(), myLocation.getLongitude())));
         }
     }
 
