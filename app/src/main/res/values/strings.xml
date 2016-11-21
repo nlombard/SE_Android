@@ -34,4 +34,7 @@
     <string name="confirm_password_missing">Please confirm password</string>
     <string name="password_match_error">Passwords don\'t match</string>
     <string name="tv_username">Username</string>
+    <string name="title_activity_friend_list">FriendList</string>
+
+    <string name="action_settings">Settings</string>
 </resources>
