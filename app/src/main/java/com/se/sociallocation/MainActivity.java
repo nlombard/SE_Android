@@ -1,13 +1,20 @@
 package com.se.sociallocation;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.media.RingtoneManager;
+import android.net.Network;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
@@ -27,6 +34,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 //import com.google.android.gms.drive.Permission;
 //import com.google.android.gms.maps.CameraUpdateFactory;
 //import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 //import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -45,6 +53,21 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+//import com.pusher.android.PusherAndroid;
+//import com.pusher.android.notifications.PushNotificationRegistration;
+import com.google.firebase.messaging.RemoteMessage;
+import com.pusher.android.PusherAndroid;
+import com.pusher.android.notifications.PushNotificationRegistration;
+import com.pusher.android.notifications.fcm.FCMPushNotificationReceivedListener;
+import com.pusher.android.notifications.interests.InterestSubscriptionChangeListener;
+import com.pusher.android.notifications.tokens.PushNotificationRegistrationListener;
+import com.pusher.client.Pusher;
+import com.pusher.client.channel.Channel;
+import com.pusher.client.channel.SubscriptionEventListener;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 
@@ -75,10 +98,28 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        Pusher pusher = new Pusher("c54c5ba2b4c92e1b7056");
+        Channel channel = pusher.subscribe("test_channel");
+
+        channel.bind("my_event", new SubscriptionEventListener() {
+            @Override
+            public void onEvent(String channelName, String eventName, final String data) {
+//                System.out.println(data);
+                sendNotification(data);
+            }
+        });
+
+        pusher.connect();
+
+        registerPusher();
+
         // Initialize Firebase Auth and Database Reference
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
         mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        String token = MyFirebaseInstanceIDService.token();
+        Log.d("Token", token);
 
         if (mFirebaseUser == null) {
             // Not logged in, launch the Log In activity
@@ -276,7 +317,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
-            // Handle the camera action
+            mMap.animateCamera(CameraUpdateFactory.newLatLng());
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
@@ -286,7 +327,8 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
-
+//            new NetworkUtils().execute();
+            sendNotification("kris", "hey");
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -298,6 +340,81 @@ public class MainActivity extends AppCompatActivity
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
+    }
+
+    public void sendNotification(String user, final String message) {
+
+        Pusher pusher = new Pusher("c54c5ba2b4c92e1b7056");
+        Channel channel = pusher.subscribe("test_channel");
+
+        channel.bind("my_event", new SubscriptionEventListener() {
+            @Override
+            public void onEvent(String channelName, String eventName, final String data) {
+                System.out.println(data);
+            }
+        });
+
+        pusher.connect();
+    }
+
+    public void sendNotification(String messageBody) {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
+                PendingIntent.FLAG_ONE_SHOT);
+
+        Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle("Social Location")
+                .setContentText(messageBody)
+//                .setSound(defaultSoundUri)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent);
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        notificationManager.notify(0, notificationBuilder.build());
+    }
+
+    public void registerPusher() {
+        PusherAndroid pusher = new PusherAndroid("c54c5ba2b4c92e1b7056");
+        PushNotificationRegistration nativePusher = pusher.nativePusher();
+        try {
+            nativePusher.registerFCM(this, new PushNotificationRegistrationListener() {
+                @Override
+                public void onSuccessfulRegistration() {
+                    Log.d("Registration", "success");
+                }
+
+                @Override
+                public void onFailedRegistration(int i, String s) {
+                    Log.d("Registration", "failure");
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        nativePusher.subscribe("test_channel", new InterestSubscriptionChangeListener() {
+            @Override
+            public void onSubscriptionChangeSucceeded() {
+                Log.d("Subscription", "success");
+            }
+
+            @Override
+            public void onSubscriptionChangeFailed(int i, String s) {
+                Log.d("Subscription", "failure");
+            }
+        });
+        nativePusher.setFCMListener(new FCMPushNotificationReceivedListener() {
+            @Override
+            public void onMessageReceived(RemoteMessage remoteMessage) {
+                Log.d("Message", remoteMessage.getData().toString());
+                sendNotification(remoteMessage.getData().toString());
+            }
+        });
     }
 }
 
