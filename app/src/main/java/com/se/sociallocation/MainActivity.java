@@ -2,9 +2,11 @@ package com.se.sociallocation;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -69,7 +71,7 @@ public class MainActivity extends AppCompatActivity
     private FirebaseUser mFirebaseUser;
     private DatabaseReference mDatabase;
     private String mUserId;
-    private HashMap<String, Marker> mHashmap = new HashMap<String, Marker>();
+    private HashMap<String, Marker> mHashmap = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +84,8 @@ public class MainActivity extends AppCompatActivity
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
         mDatabase = FirebaseDatabase.getInstance().getReference();
+
+//
 
         if (mFirebaseUser == null) {
             // Not logged in, launch the Log In activity
@@ -108,7 +112,48 @@ public class MainActivity extends AppCompatActivity
 //
 //    }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        if (requestCode == 1) {
+            // Make sure the request was successful
+            if (resultCode == 1) {
+                String user = data.getStringExtra("userID");
+                Log.i("click6",user);
 
+                moveToUser(user);
+                // Go to this user!
+                // The user picked a contact.
+                // The Intent's data Uri identifies which contact was selected.
+
+                // Do something with the contact here (bigger example below)
+            }
+        }
+    }
+
+    protected void moveToUser(String userID){
+        DatabaseReference userRef = mDatabase.child("data").child("locations").child(userID);
+
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.hasChild("lat") && dataSnapshot.hasChild("lng") && dataSnapshot.hasChild("name")) {
+                    Double lat = Double.parseDouble(dataSnapshot.child("lat").getValue().toString());
+                    Double lng = Double.parseDouble(dataSnapshot.child("lng").getValue().toString());
+                    LatLng person = new LatLng(lat,lng);
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(person,18.0f));
+                    mHashmap.get(dataSnapshot.getKey()).showInfoWindow();
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+    }
     @Override
     public void onMapReady(GoogleMap googleMap){
         mMap = googleMap;
@@ -170,11 +215,21 @@ public class MainActivity extends AppCompatActivity
                     Double lng = Double.parseDouble(dataSnapshot.child("lng").getValue().toString());
                     LatLng person = new LatLng(lat,lng);
                     if (!mHashmap.containsKey(dataSnapshot.getKey())) { //marker logic, if not in hashmap then create a marker
-                        Marker marker = mMap.addMarker(new MarkerOptions().position(person).title(dataSnapshot.child("name").getValue().toString())
-                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.pegman)));
-                        mHashmap.put(dataSnapshot.getKey(), marker);
+                        if (dataSnapshot.getKey() != mUserId) {
+                            Marker marker = mMap.addMarker(new MarkerOptions().position(person).title(dataSnapshot.child("name").getValue().toString())
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)));
+                            mHashmap.put(dataSnapshot.getKey(), marker);
+//                            Marker marker = mMap.addMarker(new MarkerOptions().position(person).title(dataSnapshot.child("name").getValue().toString())
+//                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.pegman)));
+//                            mHashmap.put(dataSnapshot.getKey(), marker);
+                        } else { //current user
+                            Marker marker = mMap.addMarker(new MarkerOptions().position(person).title(dataSnapshot.child("name").getValue().toString())
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                            mHashmap.put(dataSnapshot.getKey(), marker);
+                        }
                     } else { //else if it is in the map so the marker exists, move it
                         mHashmap.get(dataSnapshot.getKey()).setPosition(person);
+                        //if current user can move camera to their location. Only really makes sense when one has multiple devices 
                     }
                 }
             }
@@ -185,6 +240,12 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
+
+//    @Override
+//    public void onConfigurationChanged(Configuration newConfig) {
+//        super.onConfigurationChanged(newConfig);
+//        setContentView(R.layout.activity_main);
+//    }
 
     private void removeFirebaseFriendBinding( String friendID){
         mHashmap.get(friendID).remove();
@@ -197,13 +258,14 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 getMyLocation();
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(myLocation.getLatitude(), myLocation.getLongitude()),16.0f));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(myLocation.getLatitude(), myLocation.getLongitude()),17.0f));
 
                 //now posts just change the value of the children
                 mDatabase.child("data").child("locations").child(mUserId).child("lat").setValue(String.valueOf(myLocation.getLatitude()));
                 mDatabase.child("data").child("locations").child(mUserId).child("lng").setValue(String.valueOf(myLocation.getLongitude()));
                 Snackbar.make(view, "Current Location Updated", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+                mHashmap.get(mUserId).showInfoWindow();
             }
         });
     }
@@ -319,24 +381,25 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        if (id == R.id.nav_map) {
+            // Handle the map action
+            // intent to main map
+        } else if (id == R.id.nav_friends) {
+            // intent to friends activity
+            Intent intent = new Intent(this, FriendList.class);
+            startActivityForResult(intent,1); //1 for all good
+        } else if (id == R.id.nav_profile) {
+            // go to profile info
 
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        } else if (id == R.id.nav_settings) {
+            // go to settings info
         }
-
+        
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
     private void loadLogInView() {
         Intent intent = new Intent(this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
