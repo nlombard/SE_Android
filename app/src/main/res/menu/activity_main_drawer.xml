@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/nav_map"
-        android:icon="@android:drawable/ic_menu_mapmode"
+        android:icon="@android:drawable/ic_dialog_map"
         android:title="Map"
         android:checkable="false" />
     <item
@@ -20,6 +20,9 @@
         android:title="Add Friend"
         android:checkable="false" />
 
+    <item android:title="Friend Requests"
+        android:id="@+id/nav_friend_requests"
+        android:icon="@android:drawable/ic_menu_share" />
     <item android:title="User">
         <menu>
             <item

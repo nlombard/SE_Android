@@ -129,17 +129,6 @@ public class FriendList extends AppCompatActivity
                 finish();
             }
         });
-
-        /*Code for removing friend
-        friend_list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-//                Log.d("Remove", "Friend long pressed");
-                mDatabase.child("data").child("friends").child(mUserId).child(id_array.get(i)).removeValue();
-                return true;
-            }
-        });
-        //*/
     }
 
     private void loadLogInView() {
@@ -175,7 +164,7 @@ public class FriendList extends AppCompatActivity
         mDatabase.child("data").child("friends").child(mUserId).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                if( (long) dataSnapshot.getValue() >= 1) {
+                if( (long) dataSnapshot.getValue() == 1) { //value one for current friends
                     //TODO Add to list here
                     //(dataSnapshot.getKey());
                     //get name here
@@ -188,13 +177,13 @@ public class FriendList extends AppCompatActivity
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) { //when value of friend is changed this will update
-                if( (long) dataSnapshot.getValue() >= 1) {
+                if( (long) dataSnapshot.getValue() == 1) {
                     //TODO Add to list here
                     //(dataSnapshot.getKey());
                     findUserName(dataSnapshot.getKey());
                     //friend_array.add(dataSnapshot.child("name").getValue().toString());
                     id_array.add(dataSnapshot.getKey());
-                } else if( (long) dataSnapshot.getValue() == 0){  //this might be the reason for missing your person
+                } else{  //this might be the reason for missing your person
                     //TODO Remove from list here
                     //(dataSnapshot.getKey());
                 }
@@ -287,7 +276,15 @@ public class FriendList extends AppCompatActivity
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         if(item.getItemId() == R.id.delete) {
             Log.d("Remove", "Friend long pressed" + id_array.get(info.position));
-//            mDatabase.child("data").child("friends").child(mUserId).child(id_array.get(info.position)).removeValue();
+            mDatabase.child("data").child("friends").child(mUserId).child(id_array.get(info.position)).removeValue(); //remove friend from your list
+            mDatabase.child("data").child("friends").child(id_array.get(info.position)).child(mUserId).removeValue(); //remove the other way
+
+            Intent intent = getIntent();
+            finish();
+            startActivity(intent);
+            this.overridePendingTransition(0, 0);
+
+
         }
         return super.onContextItemSelected(item);
     }

@@ -427,6 +427,9 @@ public class MainActivity extends AppCompatActivity
 //            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivityForResult(intent, 1);
+        } else if (id == R.id.nav_friend_requests) {
+            Intent intent = new Intent(this, FriendRequests.class);
+            startActivity(intent);
         }
         
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

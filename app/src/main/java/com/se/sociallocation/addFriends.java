@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -65,13 +66,19 @@ public class addFriends extends AppCompatActivity
         mDatabase.child("users").orderByChild("email").equalTo(emailText.getText().toString().trim()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                View parentLayout = findViewById(R.id.nav_view);
                 if (!dataSnapshot.exists()) {
                     Log.d("Search", "Email not found");
+                    Snackbar.make(parentLayout, "Email not found!", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
                 } else {
                     for (DataSnapshot post: dataSnapshot.getChildren()) {
 //                        Log.d("Search", post.getKey());
                         //set value to 2 so that we know it is a pending friend request
                         mDatabase.child("friends").child(mUser.getUid()).child(post.getKey()).setValue(2);
+                        //close_keyboard(); try to close keyboard before showing snackbar
+                        Snackbar.make(parentLayout, "Friend request sent to " + emailText.getText().toString().trim(), Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
                     }
                 }
             }
@@ -129,5 +136,13 @@ public class addFriends extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+    public void close_keyboard() {
+        //does not work!
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(addFriends.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 }
