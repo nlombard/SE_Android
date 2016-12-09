@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -82,6 +84,7 @@ public class FriendList extends AppCompatActivity
             mUserId = mFirebaseUser.getUid();
             CreateFriendList();
             updateView();
+            registerForContextMenu(findViewById(R.id.friend_listview));
 
             //Log.i("new_item_2", friend_array.get(friend_array.size() - 1));
             //Arrays.asList(friend_array.toArray()).toArray(new String[friend_array.size()]);
@@ -126,6 +129,17 @@ public class FriendList extends AppCompatActivity
                 finish();
             }
         });
+
+        /*Code for removing friend
+        friend_list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+//                Log.d("Remove", "Friend long pressed");
+                mDatabase.child("data").child("friends").child(mUserId).child(id_array.get(i)).removeValue();
+                return true;
+            }
+        });
+        //*/
     }
 
     private void loadLogInView() {
@@ -260,5 +274,21 @@ public class FriendList extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.long_press_menu ,menu);
+    }
+
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        if(item.getItemId() == R.id.delete) {
+            Log.d("Remove", "Friend long pressed" + id_array.get(info.position));
+//            mDatabase.child("data").child("friends").child(mUserId).child(id_array.get(info.position)).removeValue();
+        }
+        return super.onContextItemSelected(item);
     }
 }

@@ -14,12 +14,16 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class SignUpActivity extends AppCompatActivity {
 
     protected EditText passwordEditText;
     protected EditText confirmPasswordEditText;
     protected EditText emailEditText;
+    protected EditText usernameEditText;
     protected Button signUpButton;
     private FirebaseAuth mFirebaseAuth;
 
@@ -32,6 +36,7 @@ public class SignUpActivity extends AppCompatActivity {
         mFirebaseAuth = FirebaseAuth.getInstance();
 
         passwordEditText = (EditText)findViewById(R.id.password);
+        usernameEditText = (EditText)findViewById(R.id.username);
         confirmPasswordEditText = (EditText)findViewById(R.id.confirm_password);
         emailEditText = (EditText)findViewById(R.id.email);
         signUpButton = (Button)findViewById(R.id.email_sign_up_button);
@@ -41,13 +46,15 @@ public class SignUpActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String password = passwordEditText.getText().toString();
                 String confirmPassword = confirmPasswordEditText.getText().toString();
-                String email = emailEditText.getText().toString();
+                final String email = emailEditText.getText().toString().trim();
+                final String username = usernameEditText.getText().toString().trim();
 
                 password = password.trim();
                 confirmPassword = confirmPassword.trim();
-                email = email.trim();
+//                email = email.trim();
+//                username = username.trim();
 
-                if (password.isEmpty() || email.isEmpty()) {
+                if (password.isEmpty() || email.isEmpty() || username.isEmpty()) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(SignUpActivity.this);
                     builder.setMessage(R.string.signup_error_message)
                             .setTitle(R.string.signup_error_title)
@@ -67,6 +74,7 @@ public class SignUpActivity extends AppCompatActivity {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     if (task.isSuccessful()) {
+                                        addUser(email, username);
                                         Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
                                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -88,5 +96,13 @@ public class SignUpActivity extends AppCompatActivity {
 
     private boolean checkPassword(String password, String confirmPassword) {
         return password.equals(confirmPassword);
+    }
+
+    private void addUser(String email, String username) {
+        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+        FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        mDatabase.child("data").child("users").child(mUser.getUid()).child("email").setValue(email);
+        mDatabase.child("data").child("users").child(mUser.getUid()).child("name").setValue(username);
     }
 }
