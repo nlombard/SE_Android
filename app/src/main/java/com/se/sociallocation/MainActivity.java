@@ -429,8 +429,13 @@ public class MainActivity extends AppCompatActivity
 //            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivityForResult(intent, 1);
+<<<<<<< HEAD
         } else if (id == R.id.nav_settings) {
             Intent intent = new Intent(this, AppPreferences.class);
+=======
+        } else if (id == R.id.nav_friend_requests) {
+            Intent intent = new Intent(this, FriendRequests.class);
+>>>>>>> refs/remotes/origin/master
             startActivity(intent);
         }
         
