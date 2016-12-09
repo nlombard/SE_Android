@@ -1,6 +1,7 @@
 package com.se.sociallocation;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -109,6 +110,7 @@ public class MainActivity extends AppCompatActivity
             navigationView.setNavigationItemSelectedListener(this);
 
             setUpFriends();
+            loadPreferences();
 
             ///*Code for auto check-in
             runnable = new Runnable() {
@@ -427,6 +429,9 @@ public class MainActivity extends AppCompatActivity
 //            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivityForResult(intent, 1);
+        } else if (id == R.id.nav_settings) {
+            Intent intent = new Intent(this, AppPreferences.class);
+            startActivity(intent);
         }
         
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -439,6 +444,12 @@ public class MainActivity extends AppCompatActivity
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
+    }
+
+    private void loadPreferences() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+
     }
 }
 
