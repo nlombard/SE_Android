@@ -6,6 +6,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -73,6 +74,12 @@ public class MainActivity extends AppCompatActivity
     private String mUserId;
     private HashMap<String, Marker> mHashmap = new HashMap<>();
 
+    ///* Code added for automatic check-in
+    private final Handler handler = new Handler();
+    private Runnable runnable;
+    private int timeInterval = 1;//minutes
+    //*/
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,8 +91,6 @@ public class MainActivity extends AppCompatActivity
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
         mDatabase = FirebaseDatabase.getInstance().getReference();
-
-//
 
         if (mFirebaseUser == null) {
             // Not logged in, launch the Log In activity
@@ -104,6 +109,34 @@ public class MainActivity extends AppCompatActivity
             navigationView.setNavigationItemSelectedListener(this);
 
             setUpFriends();
+
+            ///*Code for auto check-in
+            runnable = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Log.d("Auto", "Checked in");
+                        //Post location to firebase
+                        getMyLocation();
+
+                        //now posts just change the value of the children
+                        mDatabase.child("data").child("locations").child(mUserId).child("lat").setValue(String.valueOf(myLocation.getLatitude()));
+                        mDatabase.child("data").child("locations").child(mUserId).child("lng").setValue(String.valueOf(myLocation.getLongitude()));
+//                        mDatabase.child("data").child("locations").child(mUserId).child("lng").setValue(String.valueOf(timeInterval++));
+//                        mHashmap.get(mUserId).showInfoWindow();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    finally {
+                        //60*1000 is one minute
+                        //multiply by time interval to get number of minutes to wait
+                        handler.postDelayed(this, timeInterval*60*1000);
+//                        handler.postDelayed(this, 5*1000);
+                    }
+                }
+            };
+//            handler.post(runnable);
+            //*/
         }
     }
 
@@ -265,7 +298,7 @@ public class MainActivity extends AppCompatActivity
                 mDatabase.child("data").child("locations").child(mUserId).child("lng").setValue(String.valueOf(myLocation.getLongitude()));
                 Snackbar.make(view, "Current Location Updated", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                mHashmap.get(mUserId).showInfoWindow();
+//                mHashmap.get(mUserId).showInfoWindow();
             }
         });
     }
@@ -388,11 +421,12 @@ public class MainActivity extends AppCompatActivity
             // intent to friends activity
             Intent intent = new Intent(this, FriendList.class);
             startActivityForResult(intent,1); //1 for all good
-        } else if (id == R.id.nav_profile) {
-            // go to profile info
-
-        } else if (id == R.id.nav_settings) {
-            // go to settings info
+        } else if (id == R.id.nav_add_friend) {
+            // go to add friend
+            Intent intent = new Intent(this, addFriends.class);
+//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivityForResult(intent, 1);
         }
         
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

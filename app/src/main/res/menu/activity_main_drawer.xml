@@ -14,6 +14,12 @@
         android:checkable="false"
         tools:checkable="false" />
 
+    <item
+        android:id="@+id/nav_add_friend"
+        android:icon="@android:drawable/ic_input_add"
+        android:title="Add Friend"
+        android:checkable="false" />
+
     <item android:title="User">
         <menu>
             <item
