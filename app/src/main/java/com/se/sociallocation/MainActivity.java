@@ -54,6 +54,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 
 public class MainActivity extends AppCompatActivity
         implements
@@ -84,6 +85,33 @@ public class MainActivity extends AppCompatActivity
 
     private Boolean showLoc;
     private Boolean autoCheckIn;
+
+
+    private OnSharedPreferenceChangeListener listener =
+            new OnSharedPreferenceChangeListener() {
+                @Override
+                public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+                    if (key.equals("show_location_switch")) {
+                        Log.d("PreferenceChanged", "Key!" + key); // the function you want called
+                        showLoc = prefs.getBoolean("show_location_switch", true);
+                        if (!showLoc) {
+                            //delete user when they switch show location
+                            mDatabase.child("data").child("locations").child(mUserId).removeValue();
+                        } else if (autoCheckIn) {
+                            handler.post(runnable); //re-post checkin location
+                        }
+                    } else if(key.equals("auto_checkin_switch")) {
+                        Log.d("PreferenceChanged", "Key:" + key);
+                        autoCheckIn = prefs.getBoolean("auto_checkin_switch", false);
+                        if(autoCheckIn && showLoc){ //start posting again
+                            handler.post(runnable);
+                        }
+                    } else if(key.equals("time_interval")) {
+                        Log.d("PreferenceChanged", "Key:" + key);
+                        timeInterval = Integer.parseInt(prefs.getString("time_interval", "5"));
+                    }
+                }
+            };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,7 +158,8 @@ public class MainActivity extends AppCompatActivity
             loadPreferences();
             Log.d("Preferences", showLoc + ", " + autoCheckIn + ", " + Integer.toString(timeInterval));
 
-            ///*Code for auto check-in
+
+            //Code for auto check-in
             runnable = new Runnable() {
                 @Override
                 public void run() {
@@ -140,25 +169,26 @@ public class MainActivity extends AppCompatActivity
                         getMyLocation();
 
                         //now posts just change the value of the children
-                        mDatabase.child("data").child("locations").child(mUserId).child("lat").setValue(String.valueOf(myLocation.getLatitude()));
-                        mDatabase.child("data").child("locations").child(mUserId).child("lng").setValue(String.valueOf(myLocation.getLongitude()));
-                        mDatabase.child("data").child("locations").child(mUserId).child("name").setValue(mUserName); //post name in update
+                        postLocation();
+//                        mDatabase.child("data").child("locations").child(mUserId).child("lat").setValue(String.valueOf(myLocation.getLatitude()));
+//                        mDatabase.child("data").child("locations").child(mUserId).child("lng").setValue(String.valueOf(myLocation.getLongitude()));
+//                        mDatabase.child("data").child("locations").child(mUserId).child("name").setValue(mUserName); //post name in update
 //                        mDatabase.child("data").child("locations").child(mUserId).child("lng").setValue(String.valueOf(timeInterval++));
 //                        mHashmap.get(mUserId).showInfoWindow();
                     } catch (Exception e) {
                         e.printStackTrace();
-                    }
-                    finally {
+                    } finally {
                         //60*1000 is one minute
                         //multiply by time interval to get number of minutes to wait
 //                        handler.postDelayed(this, timeInterval*60*1000);
-                        handler.postDelayed(this, timeInterval*5*1000);
+                        recallAutoCheckin(this);
+//                        handler.postDelayed(this, timeInterval * 5 * 1000);
 //                        handler.postDelayed(this, 5*1000);
                     }
                 }
             };
             handler.removeCallbacksAndMessages(null);//remove all existing callbacks and messages
-            if(autoCheckIn && showLoc) {
+            if (autoCheckIn && showLoc) {
                 handler.post(runnable);
             }
             //*/
@@ -169,6 +199,19 @@ public class MainActivity extends AppCompatActivity
 //    protected void onStart(){
 //
 //    }
+    private void postLocation(){
+        if(showLoc && autoCheckIn) {
+            mDatabase.child("data").child("locations").child(mUserId).child("lat").setValue(String.valueOf(myLocation.getLatitude()));
+            mDatabase.child("data").child("locations").child(mUserId).child("lng").setValue(String.valueOf(myLocation.getLongitude()));
+            mDatabase.child("data").child("locations").child(mUserId).child("name").setValue(mUserName); //post name in update
+        }
+    }
+
+    private void recallAutoCheckin(Runnable run){
+        if (autoCheckIn && showLoc) {
+            handler.postDelayed(run, timeInterval * 1 * 1000);
+        }
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -201,7 +244,6 @@ public class MainActivity extends AppCompatActivity
                     LatLng person = new LatLng(lat,lng);
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(person,18.0f));
                     mHashmap.get(dataSnapshot.getKey()).showInfoWindow();
-
                 }
             }
 
@@ -348,16 +390,25 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getMyLocation();
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(myLocation.getLatitude(), myLocation.getLongitude()),17.0f));
+                if(showLoc) { //if sharing location
+                    getMyLocation();
+                    if(myLocation != null) {
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(myLocation.getLatitude(), myLocation.getLongitude()), 17.0f));
 
-                //now posts just change the value of the children
-                mDatabase.child("data").child("locations").child(mUserId).child("lat").setValue(String.valueOf(myLocation.getLatitude()));
-                mDatabase.child("data").child("locations").child(mUserId).child("lng").setValue(String.valueOf(myLocation.getLongitude()));
-                mDatabase.child("data").child("locations").child(mUserId).child("name").setValue(mUserName);
-                Snackbar.make(view, "Current Location Updated", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-//                mHashmap.get(mUserId).showInfoWindow();
+                        //now posts just change the value of the children
+                        mDatabase.child("data").child("locations").child(mUserId).child("lat").setValue(String.valueOf(myLocation.getLatitude()));
+                        mDatabase.child("data").child("locations").child(mUserId).child("lng").setValue(String.valueOf(myLocation.getLongitude()));
+                        mDatabase.child("data").child("locations").child(mUserId).child("name").setValue(mUserName);
+
+                        mHashmap.get(mUserId).showInfoWindow();
+
+                        Snackbar.make(view, "Current Location Updated", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
+                    }
+                } else {
+                    Snackbar.make(view, "You are currently not sharing your location.", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
             }
         });
     }
@@ -508,10 +559,18 @@ public class MainActivity extends AppCompatActivity
 
     private void loadPreferences() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(listener);
 
         showLoc = sharedPreferences.getBoolean("show_location_switch", true);
         autoCheckIn = sharedPreferences.getBoolean("auto_checkin_switch", false);
         timeInterval = Integer.parseInt(sharedPreferences.getString("time_interval", "5"));
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs.unregisterOnSharedPreferenceChangeListener(listener);
     }
 }
 
