@@ -140,13 +140,13 @@ public class FriendList extends AppCompatActivity
 
     public String findUserName(String userID){
 
-
-        mDatabase.child("data").child("locations").child(userID).addValueEventListener(new ValueEventListener() {
+        mDatabase.child("data").child("locations").child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.hasChild("lat") && dataSnapshot.hasChild("lng") && dataSnapshot.hasChild("name")) {
                     mName = dataSnapshot.child("name").getValue().toString();
                     friend_array.add(dataSnapshot.child("name").getValue().toString());
+                    id_array.add(dataSnapshot.getKey());
                     Log.i("new_item",friend_array.get(friend_array.size() - 1));
                     updateView();
                 }
@@ -164,13 +164,14 @@ public class FriendList extends AppCompatActivity
         mDatabase.child("data").child("friends").child(mUserId).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                if( (long) dataSnapshot.getValue() == 1) { //value one for current friends
+                if( (long) dataSnapshot.getValue() == 1) { //value one for current friends, and exists in database!
                     //TODO Add to list here
                     //(dataSnapshot.getKey());
                     //get name here
+                    //need to check if friend exists?
                     findUserName(dataSnapshot.getKey());
                     //friend_array.add(findUserName(dataSnapshot.getKey()));
-                    id_array.add(dataSnapshot.getKey());
+//                    id_array.add(dataSnapshot.getKey());
                     //Log.i("click4", findUserName(dataSnapshot.getKey()));
                 }
             }

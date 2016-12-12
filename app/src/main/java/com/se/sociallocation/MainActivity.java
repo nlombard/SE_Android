@@ -1,6 +1,7 @@
 package com.se.sociallocation;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -72,13 +73,17 @@ public class MainActivity extends AppCompatActivity
     private FirebaseUser mFirebaseUser;
     private DatabaseReference mDatabase;
     private String mUserId;
+    private String mUserName;
     private HashMap<String, Marker> mHashmap = new HashMap<>();
 
     ///* Code added for automatic check-in
     private final Handler handler = new Handler();
     private Runnable runnable;
-    private int timeInterval = 1;//minutes
+    private int timeInterval;//minutes
     //*/
+
+    private Boolean showLoc;
+    private Boolean autoCheckIn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +103,18 @@ public class MainActivity extends AppCompatActivity
         } else {
             mUserId = mFirebaseUser.getUid();
 
+            mDatabase.child("data").child("users").child(mUserId).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    mUserName = dataSnapshot.getValue().toString();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    // ...
+                }
+            });
+
             SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.map);
             mapFragment.getMapAsync(this);
@@ -109,6 +126,9 @@ public class MainActivity extends AppCompatActivity
             navigationView.setNavigationItemSelectedListener(this);
 
             setUpFriends();
+            checkForDeletedUser();
+            loadPreferences();
+            Log.d("Preferences", showLoc + ", " + autoCheckIn + ", " + Integer.toString(timeInterval));
 
             ///*Code for auto check-in
             runnable = new Runnable() {
@@ -122,6 +142,7 @@ public class MainActivity extends AppCompatActivity
                         //now posts just change the value of the children
                         mDatabase.child("data").child("locations").child(mUserId).child("lat").setValue(String.valueOf(myLocation.getLatitude()));
                         mDatabase.child("data").child("locations").child(mUserId).child("lng").setValue(String.valueOf(myLocation.getLongitude()));
+                        mDatabase.child("data").child("locations").child(mUserId).child("name").setValue(mUserName); //post name in update
 //                        mDatabase.child("data").child("locations").child(mUserId).child("lng").setValue(String.valueOf(timeInterval++));
 //                        mHashmap.get(mUserId).showInfoWindow();
                     } catch (Exception e) {
@@ -130,12 +151,16 @@ public class MainActivity extends AppCompatActivity
                     finally {
                         //60*1000 is one minute
                         //multiply by time interval to get number of minutes to wait
-                        handler.postDelayed(this, timeInterval*60*1000);
+//                        handler.postDelayed(this, timeInterval*60*1000);
+                        handler.postDelayed(this, timeInterval*5*1000);
 //                        handler.postDelayed(this, 5*1000);
                     }
                 }
             };
-//            handler.post(runnable);
+            handler.removeCallbacksAndMessages(null);//remove all existing callbacks and messages
+            if(autoCheckIn && showLoc) {
+                handler.post(runnable);
+            }
             //*/
         }
     }
@@ -279,10 +304,43 @@ public class MainActivity extends AppCompatActivity
 //        super.onConfigurationChanged(newConfig);
 //        setContentView(R.layout.activity_main);
 //    }
+    private void checkForDeletedUser() {
+
+        mDatabase.child("data").child("locations").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) { //when value of friend is changed this will update
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                Log.d("KEYRemoved", "OnChildRemoved"+dataSnapshot.getValue().toString());
+                removeFirebaseFriendBinding(dataSnapshot.getKey());
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+
+        });
+    }
 
     private void removeFirebaseFriendBinding( String friendID){
+
         mHashmap.get(friendID).remove();
         mHashmap.remove(friendID);
+        Log.d("Delete!!", "Friend deleted");
     }
 
     private void setActionButton(){
@@ -296,6 +354,7 @@ public class MainActivity extends AppCompatActivity
                 //now posts just change the value of the children
                 mDatabase.child("data").child("locations").child(mUserId).child("lat").setValue(String.valueOf(myLocation.getLatitude()));
                 mDatabase.child("data").child("locations").child(mUserId).child("lng").setValue(String.valueOf(myLocation.getLongitude()));
+                mDatabase.child("data").child("locations").child(mUserId).child("name").setValue(mUserName);
                 Snackbar.make(view, "Current Location Updated", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 //                mHashmap.get(mUserId).showInfoWindow();
@@ -427,6 +486,9 @@ public class MainActivity extends AppCompatActivity
 //            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivityForResult(intent, 1);
+        } else if (id == R.id.nav_settings) {
+            Intent intent = new Intent(this, AppPreferences.class);
+            startActivity(intent);
         } else if (id == R.id.nav_friend_requests) {
             Intent intent = new Intent(this, FriendRequests.class);
             startActivity(intent);
@@ -442,6 +504,14 @@ public class MainActivity extends AppCompatActivity
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
+    }
+
+    private void loadPreferences() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        showLoc = sharedPreferences.getBoolean("show_location_switch", true);
+        autoCheckIn = sharedPreferences.getBoolean("auto_checkin_switch", false);
+        timeInterval = Integer.parseInt(sharedPreferences.getString("time_interval", "5"));
     }
 }
 
