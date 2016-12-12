@@ -251,14 +251,37 @@ public class FriendList extends AppCompatActivity
         if (id == R.id.nav_map) {
             //finsih intent and go back to the main map
             finish();
+        } else if (id == R.id.nav_add_friend){
+            Intent intent = new Intent(this, addFriends.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            startActivityForResult(intent, 1);
+            finish();
         } else if (id == R.id.nav_friends) {
-            // intent to friends activity
-
+            //current context
         } else if (id == R.id.nav_profile) {
-            // go to profile info
+            Intent intent = new Intent(this, ProfileActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            startActivityForResult(intent, 1);
+            finish();
 
+        }  else if (id == R.id.nav_friend_requests) {
+            Intent intent = new Intent(this, FriendRequests.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            startActivityForResult(intent, 1);
+            finish();
         } else if (id == R.id.nav_settings) {
-            // go to settings info
+            Intent intent = new Intent(this, AppPreferences.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            startActivityForResult(intent, 1);
+            finish();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
