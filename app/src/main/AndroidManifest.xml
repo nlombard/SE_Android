@@ -61,19 +61,15 @@
         <activity
             android:name=".addFriends"
             android:label="@string/title_activity_add_friends"
-<<<<<<< HEAD
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".AppPreferences"
             android:label="@string/action_settings"
             android:parentActivityName=".MainActivity"/>
-=======
-            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".FriendRequests"
             android:label="@string/title_activity_friend_requests"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
->>>>>>> refs/remotes/origin/master
+            android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>
