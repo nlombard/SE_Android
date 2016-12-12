@@ -401,7 +401,9 @@ public class MainActivity extends AppCompatActivity
                         mDatabase.child("data").child("locations").child(mUserId).child("lng").setValue(String.valueOf(myLocation.getLongitude()));
                         mDatabase.child("data").child("locations").child(mUserId).child("name").setValue(mUserName);
 
-                        mHashmap.get(mUserId).showInfoWindow();
+                        if(mHashmap.get(mUserId) != null){
+                            mHashmap.get(mUserId).showInfoWindow();
+                        }
 
                         Snackbar.make(view, "Current Location Updated", Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
