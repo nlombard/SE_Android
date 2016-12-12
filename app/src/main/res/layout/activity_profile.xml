@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_profile"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.se.sociallocation.ProfileActivity">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/info_page"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"
+        android:weightSum="1">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/profile_email"
+            android:layout_weight="0.06"
+            android:textAppearance="@android:style/TextAppearance.Material.Medium" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:ems="10"
+            android:id="@+id/profile_username"
+            android:layout_weight="0.06" />
+
+        <Button
+            android:text="Update Username"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/update_username_button"
+            android:layout_weight="0.06" />
+
+    </LinearLayout>
+</RelativeLayout>

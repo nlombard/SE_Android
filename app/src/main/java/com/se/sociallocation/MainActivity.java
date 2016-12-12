@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity
         } else {
             mUserId = mFirebaseUser.getUid();
 
-            mDatabase.child("data").child("users").child(mUserId).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+            mDatabase.child("data").child("users").child(mUserId).child("name").addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     mUserName = dataSnapshot.getValue().toString();
@@ -329,6 +329,7 @@ public class MainActivity extends AppCompatActivity
                         }
                     } else { //else if it is in the map so the marker exists, move it
                         mHashmap.get(dataSnapshot.getKey()).setPosition(person);
+                        mHashmap.get(dataSnapshot.getKey()).setTitle(mUserName);
                         //if current user can move camera to their location. Only really makes sense when one has multiple devices 
                     }
                 }
@@ -542,6 +543,9 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent);
         } else if (id == R.id.nav_friend_requests) {
             Intent intent = new Intent(this, FriendRequests.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_profile) {
+            Intent intent = new Intent(this, ProfileActivity.class);
             startActivity(intent);
         }
         
