@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity
         } else {
             mUserId = mFirebaseUser.getUid();
 
-            mDatabase.child("data").child("users").child(mUserId).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+            mDatabase.child("data").child("users").child(mUserId).child("name").addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     mUserName = dataSnapshot.getValue().toString();
@@ -329,6 +329,7 @@ public class MainActivity extends AppCompatActivity
                         }
                     } else { //else if it is in the map so the marker exists, move it
                         mHashmap.get(dataSnapshot.getKey()).setPosition(person);
+                        mHashmap.get(dataSnapshot.getKey()).setTitle(mUserName);
                         //if current user can move camera to their location. Only really makes sense when one has multiple devices 
                     }
                 }
@@ -525,8 +526,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_map) {
-            // Handle the map action
-            // intent to main map
+            //current context
         } else if (id == R.id.nav_friends) {
             // intent to friends activity
             Intent intent = new Intent(this, FriendList.class);
@@ -534,14 +534,15 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_add_friend) {
             // go to add friend
             Intent intent = new Intent(this, addFriends.class);
-//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivityForResult(intent, 1);
         } else if (id == R.id.nav_settings) {
             Intent intent = new Intent(this, AppPreferences.class);
             startActivity(intent);
         } else if (id == R.id.nav_friend_requests) {
             Intent intent = new Intent(this, FriendRequests.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_profile) {
+            Intent intent = new Intent(this, ProfileActivity.class);
             startActivity(intent);
         }
         

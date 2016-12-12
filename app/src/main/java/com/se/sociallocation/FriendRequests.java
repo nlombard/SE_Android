@@ -112,25 +112,42 @@ public class FriendRequests extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_map) {
-            // Handle the map action
-            // intent to main map
-            // intent to friends activity
+            //finsih intent and go back to the main map
+            finish();
+        } else if (id == R.id.nav_add_friend){
+            Intent intent = new Intent(this, addFriends.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            startActivityForResult(intent, 1);
             finish();
         } else if (id == R.id.nav_friends) {
             // intent to friends activity
             Intent intent = new Intent(this, FriendList.class);
-            startActivityForResult(intent,1); //1 for all good
-        } else if (id == R.id.nav_add_friend) {
-            // go to add friend
-            Intent intent = new Intent(this, addFriends.class);
-//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             startActivityForResult(intent, 1);
-        } else if (id == R.id.nav_friend_requests) {
-            Intent intent = new Intent(this, FriendRequests.class);
-            startActivity(intent);
-        }
+            finish();
 
+        } else if (id == R.id.nav_profile) {
+            Intent intent = new Intent(this, ProfileActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            startActivityForResult(intent, 1);
+            finish();
+
+        } else if (id == R.id.nav_settings) {
+            Intent intent = new Intent(this, AppPreferences.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            startActivityForResult(intent, 1);
+            finish();
+        } else if (id == R.id.nav_friend_requests){
+            //current context
+        }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
