@@ -78,8 +78,11 @@ public class MainActivity extends AppCompatActivity
     ///* Code added for automatic check-in
     private final Handler handler = new Handler();
     private Runnable runnable;
-    private int timeInterval = 1;//minutes
+    private int timeInterval;//minutes
     //*/
+
+    private Boolean showLoc;
+    private Boolean autoCheckIn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,6 +114,7 @@ public class MainActivity extends AppCompatActivity
 
             setUpFriends();
             loadPreferences();
+            Log.d("Preferences", showLoc + ", " + autoCheckIn + ", " + Integer.toString(timeInterval));
 
             ///*Code for auto check-in
             runnable = new Runnable() {
@@ -132,12 +136,16 @@ public class MainActivity extends AppCompatActivity
                     finally {
                         //60*1000 is one minute
                         //multiply by time interval to get number of minutes to wait
-                        handler.postDelayed(this, timeInterval*60*1000);
+//                        handler.postDelayed(this, timeInterval*60*1000);
+                        handler.postDelayed(this, timeInterval*5*1000);
 //                        handler.postDelayed(this, 5*1000);
                     }
                 }
             };
-//            handler.post(runnable);
+            handler.removeCallbacksAndMessages(null);//remove all existing callbacks and messages
+            if(autoCheckIn && showLoc) {
+                handler.post(runnable);
+            }
             //*/
         }
     }
@@ -452,7 +460,9 @@ public class MainActivity extends AppCompatActivity
     private void loadPreferences() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-
+        showLoc = sharedPreferences.getBoolean("show_location_switch", true);
+        autoCheckIn = sharedPreferences.getBoolean("auto_checkin_switch", false);
+        timeInterval = Integer.parseInt(sharedPreferences.getString("time_interval", "5"));
     }
 }
 

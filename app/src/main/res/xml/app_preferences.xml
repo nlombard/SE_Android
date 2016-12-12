@@ -12,9 +12,10 @@
         android:summary="Toggle auto check-in feature"
         android:key="auto_checkin_switch" />
 
-    <EditTextPreference
-        android:defaultValue="1"
+    <ListPreference
         android:title="Time Interval"
         android:summary="Set the time interval(minutes) for auto check-in feature"
-        android:key="auto_checkin_interval" />
+        android:key="time_interval"
+        android:entries="@array/timeEntries"
+        android:entryValues="@array/timeValues"/>
 </PreferenceScreen>
