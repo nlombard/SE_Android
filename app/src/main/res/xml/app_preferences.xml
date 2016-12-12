@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:title="Show Location"
+        android:summary="Toggle if your location is being broadcasted"
+        android:key="show_location_switch" />
+    <SwitchPreference
+        android:defaultValue="true"
+        android:title="Auto Check-in"
+        android:summary="Toggle auto check-in feature"
+        android:key="auto_checkin_switch" />
+
+    <ListPreference
+        android:title="Time Interval"
+        android:summary="Set the time interval(minutes) for auto check-in feature"
+        android:key="time_interval"
+        android:entries="@array/timeEntries"
+        android:entryValues="@array/timeValues"/>
+</PreferenceScreen>

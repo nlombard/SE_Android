@@ -20,8 +20,9 @@
         android:title="Add Friend"
         android:checkable="false" />
 
-    <item android:title="Friend Requests"
+    <item
         android:id="@+id/nav_friend_requests"
+        android:title="Friend Requests"
         android:icon="@android:drawable/ic_menu_share" />
     <item android:title="User">
         <menu>
