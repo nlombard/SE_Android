@@ -329,7 +329,7 @@ public class MainActivity extends AppCompatActivity
                         }
                     } else { //else if it is in the map so the marker exists, move it
                         mHashmap.get(dataSnapshot.getKey()).setPosition(person);
-                        mHashmap.get(dataSnapshot.getKey()).setTitle(mUserName);
+                        mHashmap.get(dataSnapshot.getKey()).setTitle(dataSnapshot.child("name").getValue().toString());
                         //if current user can move camera to their location. Only really makes sense when one has multiple devices 
                     }
                 }
