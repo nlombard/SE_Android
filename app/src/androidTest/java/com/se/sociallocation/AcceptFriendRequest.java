@@ -26,8 +26,10 @@ import org.junit.runner.RunWith;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.closeSoftKeyboard;
+import static android.support.test.espresso.action.ViewActions.longClick;
 import static android.support.test.espresso.action.ViewActions.replaceText;
 import static android.support.test.espresso.action.ViewActions.scrollTo;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
@@ -39,13 +41,22 @@ import static org.hamcrest.Matchers.allOf;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
-public class NavigateToFriend {
+public class AcceptFriendRequest {
 
     @Rule
-    public ActivityTestRule<MainActivity> mActivityTestRule = new ActivityTestRule<>(MainActivity.class);
+    public ActivityTestRule<SplashActivity> mActivityTestRule = new ActivityTestRule<>(SplashActivity.class);
 
     @Before
     public void checkLogin() {
+        //If signed in, log out to make sure you sign in to the proper user for these series of tests
+        if(FirebaseAuth.getInstance().getCurrentUser() != null) {
+            openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext());
+
+            ViewInteraction appCompatTextView = onView(
+                    allOf(withId(R.id.title), withText("Log Out"), isDisplayed()));
+            appCompatTextView.perform(click());
+        }
+
         if(FirebaseAuth.getInstance().getCurrentUser() == null) {
 //            /*
             ViewInteraction appCompatAutoCompleteTextView = onView(
@@ -58,7 +69,7 @@ public class NavigateToFriend {
 
             ViewInteraction appCompatAutoCompleteTextView3 = onView(
                     withId(R.id.email));
-            appCompatAutoCompleteTextView3.perform(scrollTo(), replaceText("test@nd.edu"), closeSoftKeyboard());
+            appCompatAutoCompleteTextView3.perform(scrollTo(), replaceText("kt@nd.edu"), closeSoftKeyboard());
 
             ViewInteraction appCompatEditText = onView(
                     withId(R.id.password));
@@ -76,7 +87,7 @@ public class NavigateToFriend {
     }
 
     @Test
-    public void navigateToFriend() {
+    public void acceptFriendRequest() {
         ViewInteraction appCompatImageButton = onView(
                 allOf(withContentDescription("Open navigation drawer"),
                         withParent(withId(R.id.toolbar)),
@@ -84,29 +95,51 @@ public class NavigateToFriend {
         appCompatImageButton.perform(click());
 
         ViewInteraction appCompatCheckedTextView = onView(
-                allOf(withId(R.id.design_menu_item_text), withText("Friends"), isDisplayed()));
+                allOf(withId(R.id.design_menu_item_text), withText("Friend Requests"), isDisplayed()));
         appCompatCheckedTextView.perform(click());
 
+        //Long Click
+        ViewInteraction appCompatTextView3 = onView(
+                allOf(withId(android.R.id.text1), withText("Maverick"),
+                        childAtPosition(
+                                allOf(withId(R.id.friend_requestsview),
+                                        withParent(withId(R.id.content_friend_requests))),
+                                0),
+                        isDisplayed()));
+        appCompatTextView3.perform(longClick());
+
         ViewInteraction appCompatTextView = onView(
-                allOf(withId(android.R.id.text1), withText("Nicholas Lombardo"),
+                allOf(withId(android.R.id.title), withText("Add Friend"), isDisplayed()));
+        appCompatTextView.perform(click());
+
+        ViewInteraction appCompatImageButton2 = onView(
+                allOf(withContentDescription("Open navigation drawer"),
+                        withParent(withId(R.id.toolbar)),
+                        isDisplayed()));
+        appCompatImageButton2.perform(click());
+
+        ViewInteraction appCompatCheckedTextView2 = onView(
+                allOf(withId(R.id.design_menu_item_text), withText("Map"), isDisplayed()));
+        appCompatCheckedTextView2.perform(click());
+
+        ViewInteraction appCompatImageButton3 = onView(
+                allOf(withContentDescription("Open navigation drawer"),
+                        withParent(withId(R.id.toolbar)),
+                        isDisplayed()));
+        appCompatImageButton3.perform(click());
+
+        ViewInteraction appCompatCheckedTextView3 = onView(
+                allOf(withId(R.id.design_menu_item_text), withText("Friends"), isDisplayed()));
+        appCompatCheckedTextView3.perform(click());
+
+        ViewInteraction appCompatTextView2 = onView(
+                allOf(withId(android.R.id.text1), withText("Maverick"),
                         childAtPosition(
                                 allOf(withId(R.id.friend_listview),
                                         withParent(withId(R.id.content_friend_list))),
                                 0),
                         isDisplayed()));
-        appCompatTextView.perform(click());
-
-        UiDevice device = UiDevice.getInstance(getInstrumentation());
-        UiObject marker = device.findObject(new UiSelector().descriptionContains("Nicholas Lombardo"));
-        try {
-            marker.click();
-        } catch (UiObjectNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        ViewInteraction imageView = onView(
-                allOf(withContentDescription("Get directions"), isDisplayed()));
-        imageView.perform(click());
+        appCompatTextView2.perform(click());
 
     }
 
@@ -145,4 +178,5 @@ public class NavigateToFriend {
             //*/
         }
     }
+
 }

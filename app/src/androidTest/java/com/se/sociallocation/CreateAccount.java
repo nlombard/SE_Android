@@ -23,6 +23,7 @@ import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.closeSoftKeyboard;
+import static android.support.test.espresso.action.ViewActions.pressImeActionButton;
 import static android.support.test.espresso.action.ViewActions.replaceText;
 import static android.support.test.espresso.action.ViewActions.scrollTo;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
@@ -33,50 +34,57 @@ import static org.hamcrest.Matchers.allOf;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
-public class Logout {
+public class CreateAccount {
 
     @Rule
     public ActivityTestRule<SplashActivity> mActivityTestRule = new ActivityTestRule<>(SplashActivity.class);
 
     @Before
     public void checkLogin() {
-        if(FirebaseAuth.getInstance().getCurrentUser() == null) {
-//            /*
-            ViewInteraction appCompatAutoCompleteTextView = onView(
-                    withId(R.id.email));
-            appCompatAutoCompleteTextView.perform(scrollTo(), click());
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext());
 
-            ViewInteraction appCompatAutoCompleteTextView2 = onView(
-                    withId(R.id.email));
-            appCompatAutoCompleteTextView2.perform(scrollTo(), click());
-
-            ViewInteraction appCompatAutoCompleteTextView3 = onView(
-                    withId(R.id.email));
-            appCompatAutoCompleteTextView3.perform(scrollTo(), replaceText("test@nd.edu"), closeSoftKeyboard());
-
-            ViewInteraction appCompatEditText = onView(
-                    withId(R.id.password));
-            appCompatEditText.perform(scrollTo(), replaceText("hello1"), closeSoftKeyboard());
-
-            ViewInteraction appCompatButton = onView(
-                    allOf(withId(R.id.email_sign_in_button), withText("Sign in"),
-                            withParent(allOf(withId(R.id.email_login_form),
-                                    withParent(withId(R.id.login_form))))));
-            appCompatButton.perform(scrollTo(), click());
-
-            allowPermissionsIfNeeded();
-            //*/
+            ViewInteraction appCompatTextView = onView(
+                    allOf(withId(R.id.title), withText("Log Out"), isDisplayed()));
+            appCompatTextView.perform(click());
         }
     }
 
     @Test
-    public void logout() {
-       openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext());
+    public void createAccount() {
+        ViewInteraction appCompatButton = onView(
+                allOf(withId(R.id.create_account_button), withText("Sign Up"),
+                        withParent(allOf(withId(R.id.email_login_form),
+                                withParent(withId(R.id.login_form))))));
+        appCompatButton.perform(scrollTo(), click());
 
-        ViewInteraction appCompatTextView = onView(
-                allOf(withId(R.id.title), withText("Log Out"), isDisplayed()));
-        appCompatTextView.perform(click());
+        ViewInteraction appCompatAutoCompleteTextView = onView(
+                withId(R.id.email));
+        appCompatAutoCompleteTextView.perform(scrollTo(), replaceText("izzy@nd.edu"), closeSoftKeyboard());
 
+        ViewInteraction appCompatAutoCompleteTextView2 = onView(
+                withId(R.id.username));
+        appCompatAutoCompleteTextView2.perform(scrollTo(), replaceText("Izzy"), closeSoftKeyboard());
+
+        ViewInteraction appCompatEditText = onView(
+                withId(R.id.password));
+        appCompatEditText.perform(scrollTo(), replaceText("hello1"), closeSoftKeyboard());
+
+        ViewInteraction appCompatEditText2 = onView(
+                withId(R.id.confirm_password));
+        appCompatEditText2.perform(scrollTo(), replaceText("hello1"), closeSoftKeyboard());
+
+        ViewInteraction appCompatEditText3 = onView(
+                withId(R.id.confirm_password));
+        appCompatEditText3.perform(scrollTo(), replaceText("hello1"), closeSoftKeyboard());
+
+        ViewInteraction appCompatButton2 = onView(
+                allOf(withId(R.id.email_sign_up_button), withText("Sign Up"),
+                        withParent(allOf(withId(R.id.email_login_form),
+                                withParent(withId(R.id.login_form))))));
+        appCompatButton2.perform(scrollTo(), click());
+
+        allowPermissionsIfNeeded();
     }
 
     private void allowPermissionsIfNeeded() {
