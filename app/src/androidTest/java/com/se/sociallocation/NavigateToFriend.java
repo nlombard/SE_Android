@@ -104,10 +104,6 @@ public class NavigateToFriend {
             e.printStackTrace();
         }
 
-        ViewInteraction imageView = onView(
-                allOf(withContentDescription("Get directions"), isDisplayed()));
-        imageView.perform(click());
-
     }
 
     private static Matcher<View> childAtPosition(
