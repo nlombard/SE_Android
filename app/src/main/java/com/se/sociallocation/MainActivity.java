@@ -209,7 +209,7 @@ public class MainActivity extends AppCompatActivity
 
     private void recallAutoCheckin(Runnable run){
         if (autoCheckIn && showLoc) {
-            handler.postDelayed(run, timeInterval * 1 * 1000);
+            handler.postDelayed(run, timeInterval * 60 * 1000);
         }
     }
 

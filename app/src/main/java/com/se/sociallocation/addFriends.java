@@ -76,7 +76,7 @@ public class addFriends extends AppCompatActivity
                     for (DataSnapshot post: dataSnapshot.getChildren()) {
 //                        Log.d("Search", post.getKey());
                         //set value to 2 so that we know it is a pending friend request
-                        mDatabase.child("friends").child(mUser.getUid()).child(post.getKey()).setValue(2);
+                        mDatabase.child("friends").child(post.getKey()).child(mUser.getUid()).setValue(2);
                         //close_keyboard(); try to close keyboard before showing snackbar
                         Snackbar.make(parentLayout, "Friend request sent to " + emailText.getText().toString().trim(), Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
