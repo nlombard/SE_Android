@@ -29,6 +29,7 @@ import org.junit.runner.RunWith;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.closeSoftKeyboard;
 import static android.support.test.espresso.action.ViewActions.replaceText;
@@ -50,6 +51,14 @@ public class AaddFriend {
 
     @Before
     public void checkLogin() {
+        if(FirebaseAuth.getInstance().getCurrentUser() != null) {
+            openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext());
+
+            ViewInteraction appCompatTextView = onView(
+                    allOf(withId(R.id.title), withText("Log Out"), isDisplayed()));
+            appCompatTextView.perform(click());
+        }
+
         if(FirebaseAuth.getInstance().getCurrentUser() == null) {
 //            /*
             ViewInteraction appCompatAutoCompleteTextView = onView(

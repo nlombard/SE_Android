@@ -39,7 +39,7 @@ import static org.hamcrest.Matchers.allOf;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
-public class SelectFriend {
+public class GotoFriend {
 
     @Rule
     public ActivityTestRule<SplashActivity> mActivityTestRule = new ActivityTestRule<>(SplashActivity.class);
@@ -88,11 +88,11 @@ public class SelectFriend {
         appCompatCheckedTextView.perform(click());
 
         ViewInteraction appCompatTextView = onView(
-                allOf(withId(android.R.id.text1), withText("Nancy"),
+                allOf(withId(android.R.id.text1), withText("Nicholas Lombardo"),
                         childAtPosition(
                                 allOf(withId(R.id.friend_listview),
                                         withParent(withId(R.id.content_friend_list))),
-                                1),
+                                0),
                         isDisplayed()));
         appCompatTextView.perform(click());
 

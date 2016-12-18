@@ -103,7 +103,7 @@ public class RemoveFriend {
                         childAtPosition(
                                 allOf(withId(R.id.friend_listview),
                                         withParent(withId(R.id.content_friend_list))),
-                                2),
+                                1),
                         isDisplayed()));
         appCompatTextView.perform(longClick());
 
