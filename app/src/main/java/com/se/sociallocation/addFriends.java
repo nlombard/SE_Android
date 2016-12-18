@@ -31,6 +31,7 @@ import java.lang.reflect.Array;
 public class addFriends extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private FirebaseAuth mFirebaseAuth;
     protected Button addFriendButton;
     protected EditText emailText;
 
@@ -50,6 +51,7 @@ public class addFriends extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        mFirebaseAuth = FirebaseAuth.getInstance();
         addFriendButton = (Button) findViewById(R.id.button_add_friend);
         emailText = (EditText) findViewById(R.id.search_email);
         addFriendButton.setOnClickListener(new View.OnClickListener() {
@@ -104,7 +106,7 @@ public class addFriends extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.add_friends, menu);
+        getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
@@ -116,11 +118,20 @@ public class addFriends extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_logout) {
+            mFirebaseAuth.signOut(); //Signout
+            loadLogInView(); //leave page
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void loadLogInView() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")

@@ -223,7 +223,7 @@ public class FriendList extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.friend_list, menu);
+        getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
@@ -235,7 +235,9 @@ public class FriendList extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_logout) {
+            mFirebaseAuth.signOut(); //Signout
+            loadLogInView(); //leave page
             return true;
         }
 
